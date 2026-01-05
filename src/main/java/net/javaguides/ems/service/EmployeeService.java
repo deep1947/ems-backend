@@ -1,8 +1,11 @@
 package net.javaguides.ems.service;
 
 import net.javaguides.ems.dto.EmployeeDto;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
+
+
 
 public interface EmployeeService {
     EmployeeDto createEmployee(EmployeeDto employeeDto);
@@ -14,4 +17,6 @@ public interface EmployeeService {
     EmployeeDto updateEmployee(Long employeeid, EmployeeDto updatedEmployee);
 
     void deleteEmployee(Long employeeId);
+
+    Page<EmployeeDto> getEmployeesPaged(int page, int size);
 }

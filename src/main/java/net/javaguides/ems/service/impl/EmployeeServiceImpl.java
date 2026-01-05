@@ -8,6 +8,9 @@ import net.javaguides.ems.exception.ResourceNotFoundException;
 import net.javaguides.ems.mapper.EmployeeMapper;
 import net.javaguides.ems.repository.EmployeeRepository;
 import net.javaguides.ems.service.EmployeeService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -67,6 +70,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + employeeId));
         employeeRepository.deleteById(employeeId);
+    }
+
+    @Override
+    public Page<EmployeeDto> getEmployeesPaged(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return employeeRepository.findAll(pageable)
+                .map(EmployeeMapper::mapToEmployeeDto);
     }
 
 }

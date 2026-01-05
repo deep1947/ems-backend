@@ -1,5 +1,10 @@
 package net.javaguides.ems.controller;
 
+import net.javaguides.ems.entity.Employee;
+import net.javaguides.ems.repository.EmployeeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 
@@ -19,13 +24,23 @@ import java.util.List;
 public class EmployeeController {
 
     private EmployeeService employeeService;
+    private EmployeeRepository employeeRepository;
 
     //Build Add Employee Rest API
     @PostMapping
     public ResponseEntity createEmployee(@RequestBody EmployeeDto employeeDto) {
         EmployeeDto savedEmployee = employeeService.createEmployee(employeeDto);
-        System.out.println("Saved Employee: " + savedEmployee);
         return new ResponseEntity<>(savedEmployee, HttpStatus.CREATED);
+    }
+
+    // ✅ GET EMPLOYEES WITH PAGINATION
+    @GetMapping("/paged")
+    public Page<Employee> getEmployeesWithPagination(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return employeeRepository.findAll(pageable);
     }
 
     //Build Get Employee By Id Rest API
