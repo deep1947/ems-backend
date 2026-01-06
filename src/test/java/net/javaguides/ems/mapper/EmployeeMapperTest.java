@@ -17,7 +17,7 @@ class EmployeeMapperTest {
         assertEquals(emp.getId(), dto.getId());
         assertEquals(emp.getFirstName(), dto.getFirstName());
         assertEquals(emp.getLastName(), dto.getLastName());
-        assertEquals(emp.getEmail(), dto.getEmail());
+        assertEquals(emp.getEmailId(), dto.getEmailId());
     }
 
     @Test
@@ -29,7 +29,7 @@ class EmployeeMapperTest {
         assertEquals(dto.getId(), emp.getId());
         assertEquals(dto.getFirstName(), emp.getFirstName());
         assertEquals(dto.getLastName(), emp.getLastName());
-        assertEquals(dto.getEmail(), emp.getEmail());
+        assertEquals(dto.getEmailId(), emp.getEmailId());
     }
 }
 

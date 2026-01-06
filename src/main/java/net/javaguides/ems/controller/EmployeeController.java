@@ -28,10 +28,13 @@ public class EmployeeController {
 
     //Build Add Employee Rest API
     @PostMapping
-    public ResponseEntity createEmployee(@RequestBody EmployeeDto employeeDto) {
+    public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employeeDto) {
         EmployeeDto savedEmployee = employeeService.createEmployee(employeeDto);
         return new ResponseEntity<>(savedEmployee, HttpStatus.CREATED);
     }
+
+
+
 
     // ✅ GET EMPLOYEES WITH PAGINATION
     @GetMapping("/paged")
