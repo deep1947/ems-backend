@@ -19,4 +19,7 @@ public interface EmployeeService {
     void deleteEmployee(Long employeeId);
 
     Page<EmployeeDto> getEmployeesPaged(int page, int size);
+
+    Page<EmployeeDto> searchEmployees(String keyword, int page, int size, String sortBy, String direction
+    );
 }

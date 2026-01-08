@@ -11,6 +11,7 @@ import net.javaguides.ems.service.EmployeeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -79,5 +80,36 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeRepository.findAll(pageable)
                 .map(EmployeeMapper::mapToEmployeeDto);
     }
+
+    @Override
+    public Page<EmployeeDto> searchEmployees(
+            String keyword,
+            int page,
+            int size,
+            String sortBy,
+            String direction
+    ) {
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Employee> employees;
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            employees = employeeRepository.findAll(pageable);
+        } else {
+            employees = employeeRepository
+                    .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailIdContainingIgnoreCase(
+                            keyword, keyword, keyword, pageable
+                    );
+        }
+
+        return employees.map(EmployeeMapper::mapToEmployeeDto);
+    }
+
+
 
 }

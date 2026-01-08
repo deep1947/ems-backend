@@ -74,4 +74,15 @@ public class EmployeeController {
         employeeService.deleteEmployee(employeeId);
         return ResponseEntity.ok("Employee deleted successfully");
     }
+    //Build Search Employee Rest API
+    @GetMapping("/search")
+    public Page<EmployeeDto> searchEmployees(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "firstName") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        return employeeService.searchEmployees(keyword, page, size, sortBy, direction);
+    }
 }
