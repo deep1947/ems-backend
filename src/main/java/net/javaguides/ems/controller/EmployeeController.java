@@ -5,6 +5,7 @@ import net.javaguides.ems.repository.EmployeeRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 
@@ -16,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/employees")
 @AllArgsConstructor
@@ -26,63 +27,63 @@ public class EmployeeController {
     private EmployeeService employeeService;
     private EmployeeRepository employeeRepository;
 
-    //Build Add Employee Rest API
+
+    // ================= CREATE (ADMIN ONLY) =================
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employeeDto) {
-        EmployeeDto savedEmployee = employeeService.createEmployee(employeeDto);
-        return new ResponseEntity<>(savedEmployee, HttpStatus.CREATED);
+    public ResponseEntity<EmployeeDto> createEmployee(
+            @RequestBody EmployeeDto employeeDto) {
+        return new ResponseEntity<>(
+                employeeService.createEmployee(employeeDto),
+                HttpStatus.CREATED
+        );
     }
 
-
-
-
-    // ✅ GET EMPLOYEES WITH PAGINATION
-    @GetMapping("/paged")
-    public Page<Employee> getEmployeesWithPagination(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        return employeeRepository.findAll(pageable);
+    // ================= GET BY ID (USER + ADMIN) =================
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @GetMapping("/{id}")
+    public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Long id) {
+        return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
-    //Build Get Employee By Id Rest API
-    @GetMapping("{id}")
-    public ResponseEntity getEmployeeById(@PathVariable("id") Long employeeId) {
-        EmployeeDto employeeDto = employeeService.getEmployeeById(employeeId);
-        return ResponseEntity.ok(employeeDto);
+    // ================= UPDATE (ADMIN ONLY) =================
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<EmployeeDto> updateEmployee(
+            @PathVariable Long id,
+            @RequestBody EmployeeDto updatedEmployee) {
+
+        return ResponseEntity.ok(
+                employeeService.updateEmployee(id, updatedEmployee)
+        );
     }
 
-    //Build Get All Employees Rest API
-    @GetMapping
-    public ResponseEntity<List<EmployeeDto>> getAllEmployees() {
-        List<EmployeeDto> employees = employeeService.getAllEmployees();
-        return ResponseEntity.ok(employees);
-    }
-
-    //Build Update Employee Rest API
-    @PutMapping("{id}")
-    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable("id") Long employeeId,
-                                                      @RequestBody EmployeeDto updatedEmployee) {
-        EmployeeDto employeeDto = employeeService.updateEmployee(employeeId, updatedEmployee);
-        return ResponseEntity.ok(employeeDto);
-    }
-
-    //Build Delete Employee Rest API
-    @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteEmployee(@PathVariable("id") Long employeeId) {
-        employeeService.deleteEmployee(employeeId);
+    // ================= DELETE (ADMIN ONLY) =================
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployee(id);
         return ResponseEntity.ok("Employee deleted successfully");
     }
-    //Build Search Employee Rest API
+
+    // ================= GET ALL =================
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @GetMapping
+    public ResponseEntity<List<EmployeeDto>> getAllEmployees() {
+        return ResponseEntity.ok(employeeService.getAllEmployees());
+    }
+
+    // ================= SEARCH =================
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/search")
     public Page<EmployeeDto> searchEmployees(
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "firstName") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction
-    ) {
+            @RequestParam(defaultValue = "asc") String direction) {
+
         return employeeService.searchEmployees(keyword, page, size, sortBy, direction);
     }
+
 }
