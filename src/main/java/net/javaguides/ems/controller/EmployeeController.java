@@ -2,6 +2,7 @@ package net.javaguides.ems.controller;
 
 import net.javaguides.ems.entity.Employee;
 import net.javaguides.ems.repository.EmployeeRepository;
+import net.javaguides.ems.service.EmployeeEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ public class EmployeeController {
 
     private EmployeeService employeeService;
     private EmployeeRepository employeeRepository;
+    private EmployeeEventPublisher employeeEventPublisher;
 
 
     // ================= CREATE (ADMIN ONLY) =================

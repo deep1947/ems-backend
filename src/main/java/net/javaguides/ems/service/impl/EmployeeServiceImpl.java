@@ -8,11 +8,14 @@ import net.javaguides.ems.exception.ResourceNotFoundException;
 import net.javaguides.ems.mapper.EmployeeMapper;
 import net.javaguides.ems.repository.EmployeeRepository;
 import net.javaguides.ems.service.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import net.javaguides.ems.dto.EmployeeCreatedEvent;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,11 +25,29 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
-    private EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
+    private final KafkaTemplate<String, EmployeeCreatedEvent> kafkaTemplate;
+    private static final String TOPIC = "employee-events";
+
+
     @Override
     public EmployeeDto createEmployee(EmployeeDto employeeDto) {
+        //Save to DB-start
         Employee employee = EmployeeMapper.mapToEmployee(employeeDto);
         Employee savedEmployee = employeeRepository.save(employee);
+        //Save to DB-end
+
+        //publish event to Kafka- start
+        EmployeeCreatedEvent event =
+                new EmployeeCreatedEvent(
+                        savedEmployee.getFirstName(),
+                        savedEmployee.getLastName(),
+                        savedEmployee.getEmailId()
+                );
+        System.out.println("✅ Before Event sent to Kafka");
+        kafkaTemplate.send(TOPIC, event);
+        System.out.println("✅ Event sent to Kafka");
+        //publish event to Kafka- end
         return EmployeeMapper.mapToEmployeeDto(savedEmployee);
     }
 
@@ -37,13 +58,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         return EmployeeMapper.mapToEmployeeDto(employee);
     }
 
-//    @Override
-//    public List<EmployeeDto> getAllEmployees() {
-//        List<Employee> employee = employeeRepository.findAll();
-//        return employees.stream()
-//                .map(employee -> EmployeeMapper.mapToEmployeeDto(employee))
-//        .collect(Collectors.toList());
-//    }
 
     @Override
     public List<EmployeeDto> getAllEmployees() {
